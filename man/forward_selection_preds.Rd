@@ -2,7 +2,7 @@
 % Please edit documentation in R/simpredsel.R
 \name{forward_selection_preds}
 \alias{forward_selection_preds}
-\title{Select predictors that contribute to the predictive validity of a sum score of the predictors}
+\title{Find predictors in a set that contribute to the predictive validity of the sum score of a subset of the predictors}
 \usage{
 forward_selection_preds(
   predictors,
@@ -19,7 +19,7 @@ forward_selection_preds(
 
 \item{assoc_measure}{type of association measure. May be \code{auc} (area under the ROC) or \code{cor} (correlation). For the former, the criterion should be binary (coded 0 for absence, 1 for presence of a feature).}
 
-\item{only_positive}{consider only predictors with nonnegative correlations with the criterion?}
+\item{only_positive}{consider only predictors with positive correlations with the criterion?}
 
 \item{show_progress}{show progress?}
 }
@@ -33,5 +33,5 @@ A list containing the components
 }
 }
 \description{
-Forward selection of predictors that maximize the association of a sum score of the selected predictors with a criterion. All predictors should be coded in the same direction as the criterion, so that the (true) correlation is positive.
+The search for the best predictors is done by a simple forward selection. The procedure starts with selecting the predictor with the highest validity. Subsequently, predictors with the highest incremental validity are added. In each step, a sum score of all selected preditors is computed whose association with the criterion is assessed. Association may be measured by the area under the ROC curve or by the correlation. All predictors should be coded in the same direction as the criterion, so that the (true) correlation between the predictor and the criterion is positive. By default, predictors with nonpositive correlations with the criterion are eliminated from the predictor set.
 }

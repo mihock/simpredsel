@@ -11,8 +11,7 @@ NULL
 
 #' Compute AUCs for one or more predictors
 #'
-#' Compute AUCs with the first component of `x` as response and each of the remainings components
-#' as predictors. The first component must be binary (coded as 0, 1).
+#' Compute AUCs with the first component of `x` as response and each of the remainings components as predictors. The first component must be binary (coded as 0 for absence, and 1 for presence of a feature). The computation is done via [pROC::auc()].
 #'
 #' @param x a data frame
 #' @returns a vector of AUC values
@@ -28,14 +27,14 @@ compute_aucs <- function(x) {
     myauc
 }
 
-#' Select predictors that contribute to the predictive validity of a sum score of the predictors
+#' Find predictors in a set that contribute to the predictive validity of the sum score of a subset of the predictors
 #'
-#' Forward selection of predictors that maximize the association of a sum score of the selected predictors with a criterion. All predictors should be coded in the same direction as the criterion, so that the (true) correlation is positive.
+#' The search for the best predictors is done by a simple forward selection. The procedure starts with selecting the predictor with the highest validity. Subsequently, predictors with the highest incremental validity are added. In each step, a sum score of all selected preditors is computed whose association with the criterion is assessed. Association may be measured by the area under the ROC curve or by the correlation. All predictors should be coded in the same direction as the criterion, so that the (true) correlation between the predictor and the criterion is positive. By default, predictors with nonpositive correlations with the criterion are eliminated from the predictor set.
 #'
 #' @param predictors data frame of predictor variables
 #' @param criterion a numeric vector representing the criterion (dependent variable)
 #' @param assoc_measure type of association measure. May be `auc` (area under the ROC) or `cor` (correlation). For the former, the criterion should be binary (coded 0 for absence, 1 for presence of a feature).
-#' @param only_positive consider only predictors with nonnegative correlations with the criterion?
+#' @param only_positive consider only predictors with positive correlations with the criterion?
 #' @param show_progress show progress?
 #'
 #' @returns A list containing the components
@@ -73,8 +72,7 @@ forward_selection_preds <- function(predictors, criterion, assoc_measure = c("au
     best_pred <- 0
     old_best_assoc <- 0
     sel_pred_names <- character() # names of selected predictors
-    updated_preds <- predictors
-    remaining_preds <- predictors
+    updated_preds <- remaining_preds <- predictors
     for (i in 1:ncol(predictors)) {
         # Add the values of the best predictor from the last step (i-1)
         # to all predictors. Thus, 'updated_preds' are the new
@@ -106,21 +104,19 @@ forward_selection_preds <- function(predictors, criterion, assoc_measure = c("au
             }
         }
         final_sum_score <- updated_preds[, best_pred_idx]
-        remaining_preds[best_pred_idx] <- NULL
-        updated_preds[best_pred_idx] <- NULL
+        remaining_preds[best_pred_idx] <- updated_preds[best_pred_idx] <- NULL
         old_best_assoc <- best_assoc
         if (show_progress) {
-            if (i == 1) {
-                cat("No | Variable | Assoc/sum score | Correlation/single predictor | \n")
-            }
-            cat(i, best_pred_name, best_assoc, item_corrs[best_pred_name], "\n", sep = " | ")
+            mydf <- data.frame(i = i, variable = best_pred_name, assoc = best_assoc,
+                cor_single = item_corrs[best_pred_name])
+            print(mydf)
         }
     }
 }
 
 #' Monte Carlo Cross-Validation
 #'
-#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with `forward_selection_preds`.
+#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [forward_selection_preds].
 #'
 #' @param x data frame with predictors
 #' @param criterion criterion (to be predicted variable)
@@ -135,11 +131,10 @@ forward_selection_preds <- function(predictors, criterion, assoc_measure = c("au
 #'
 #' The components are vectors with each value representing the result of one Monte Carlo run.
 #'
+#' @references Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. *Chemometrics and Intelligent Laboratory Systems*, *56*(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2
+
 #' @export
 mc_crossvalidation <- function(x, criterion, n = 100L, assoc_measure = c("auc", "cor")) {
-    # Needs
-    #  - library splitTools
-    #  - function forward_selection_preds
     assoc_measure <- match.arg(assoc_measure)
     stopifnot(is.data.frame(x), is.atomic(criterion), is.numeric(n), n > 0)
 

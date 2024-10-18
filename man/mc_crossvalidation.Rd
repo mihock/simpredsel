@@ -26,5 +26,8 @@ A list containing the components
 The components are vectors with each value representing the result of one Monte Carlo run.
 }
 \description{
-Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with \code{forward_selection_preds}.
+Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with \link{forward_selection_preds}.
+}
+\references{
+Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. \emph{Chemometrics and Intelligent Laboratory Systems}, \emph{56}(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2
 }
