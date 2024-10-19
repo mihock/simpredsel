@@ -18,7 +18,7 @@ NULL
 #'
 #' @export
 compute_aucs <- function(x) {
-    stopifnot(is.data.frame(x))
+    stopifnot(is.data.frame(x), all(x[[1]] %in% c(0, 1)))
     myauc <- numeric(ncol(x)-1)
     for (i in 2:ncol(x)) {
         myauc[i - 1] <- pROC::auc(x[[1]], x[[i]], direction = "<", quiet = TRUE)
@@ -137,7 +137,6 @@ forward_selection_preds <- function(predictors, criterion, assoc_measure = c("au
 mc_crossvalidation <- function(x, criterion, n = 100L, assoc_measure = c("auc", "cor")) {
     assoc_measure <- match.arg(assoc_measure)
     stopifnot(is.data.frame(x), is.atomic(criterion), is.numeric(n), n > 0)
-
     k <- numeric(n)
     assoc <- numeric(n)
     assoc_valid <- numeric(n)
@@ -154,6 +153,7 @@ mc_crossvalidation <- function(x, criterion, n = 100L, assoc_measure = c("auc", 
         assoc[i] <- res$assoc
         y <- rowSums(valid_x[res$sel_pred_names])
         if (assoc_measure == "auc") {
+            stopifnot(all(criterion %in% c(0, 1)))
             assoc_valid[i] <- pROC::auc(criterion_valid, y, direction = "<",
                 quiet = TRUE)
         } else {
