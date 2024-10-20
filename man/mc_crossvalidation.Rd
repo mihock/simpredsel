@@ -4,7 +4,14 @@
 \alias{mc_crossvalidation}
 \title{Monte Carlo Cross-Validation}
 \usage{
-mc_crossvalidation(x, criterion, n = 100L, assoc_measure = c("auc", "cor"))
+mc_crossvalidation(
+  x,
+  criterion,
+  n = 100L,
+  assoc_measure = c("auc", "cor"),
+  only_positive = TRUE,
+  show_progress = FALSE
+)
 }
 \arguments{
 \item{x}{data frame with predictors}
@@ -14,6 +21,10 @@ mc_crossvalidation(x, criterion, n = 100L, assoc_measure = c("auc", "cor"))
 \item{n}{number of Monte Carlo runs (i.e., training/validation samples drawn)}
 
 \item{assoc_measure}{type of association measure. May be \code{auc} (area under the ROC) or \code{cor} (correlation). For the former, the criterion should be binary (coded for 0, 1 for presence of a feature).}
+
+\item{only_positive}{consider only predictors with positive correlations with the criterion?}
+
+\item{show_progress}{show progress?}
 }
 \value{
 A list containing the components
@@ -26,7 +37,7 @@ A list containing the components
 The components are vectors with each value representing the result of one Monte Carlo run.
 }
 \description{
-Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with \link{forward_selection_preds}.
+Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with \link{pred_sel}.
 }
 \references{
 Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. \emph{Chemometrics and Intelligent Laboratory Systems}, \emph{56}(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2

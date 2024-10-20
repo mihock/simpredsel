@@ -13,5 +13,5 @@ compute_aucs(x)
 a vector of AUC values
 }
 \description{
-Compute AUCs with the first component of \code{x} as response and each of the remainings components as predictors. The first component must be binary (coded as 0 for absence, and 1 for presence of a feature). The computation is done via \code{\link[pROC:auc]{pROC::auc()}}.
+Compute AUCs (areas under the receiver operating characteristic curve) for the first component of \code{x} as response and each of its remainings components as predictors. The first component must be binary (coded as 0 for absence, and 1 for presence of a feature). The computation is done via \code{\link[pROC:auc]{pROC::auc()}}.
 }
