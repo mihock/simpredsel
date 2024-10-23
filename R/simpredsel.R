@@ -4,7 +4,8 @@
 #### #'
 ### #' @name simpredsel
 ### #'
-#' @importFrom stats cor var
+#' @importFrom graphics hist lines
+#' @importFrom stats cor var as.formula coef glm predict reformulate update
 ### #' @importFrom splitTools partition
 ### #' @importFrom pROC auc
 NULL
@@ -27,7 +28,7 @@ compute_aucs <- function(x) {
     myauc
 }
 
-#' Predictor selection
+#' Simple Predictor Selection
 #'
 #' Find predictors in a set that contribute to the predictive validity of the sum score of the selected predictors.
 #'
@@ -37,7 +38,7 @@ compute_aucs <- function(x) {
 #'
 #' By default, predictors with nonpositive correlations with the criterion are eliminated from the predictor set. Predictors with no variance are also removed.
 #'
-#' @param predictors data frame of predictor variables
+#' @param x data frame of predictor variables
 #' @param criterion a numeric vector representing the criterion (dependent variable)
 #' @param assoc_measure type of association measure. May be `auc` (area under the ROC) or `cor` (correlation). For the former, the criterion should be binary (coded 0 for absence, 1 for presence of a feature).
 #' @param only_positive consider only predictors with positive correlations with the criterion?
@@ -53,33 +54,36 @@ compute_aucs <- function(x) {
 #' If no valid predictors are found NULL is returned.
 #'
 #' @export
-pred_sel <- function(predictors, criterion, assoc_measure = c("auc", "cor"), only_positive = TRUE, show_progress = TRUE) {
+sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_positive = TRUE, show_progress = TRUE) {
     assoc_measure <- match.arg(assoc_measure)
-    stopifnot(is.data.frame(predictors), is.atomic(criterion))
+    stopifnot(is.data.frame(x),
+        is.character(criterion), criterion %in% names(x))
+    crit_var <- x[[criterion]]
     if (assoc_measure == "auc") {
-        stopifnot(all(criterion %in% c(0, 1)))
+        stopifnot(all(crit_var %in% c(0, 1)))
     }
+    x[[criterion]] <- NULL
     # Remove predictors that have no variance.
     # Should that be done *before* the CV iterations?
-    n_pred <- ncol(predictors)
-    item_vars <- diag(var(predictors))
-    predictors <- predictors[which(item_vars > 0)]
-    k0 <- n_pred - ncol(predictors)
+    n_pred <- ncol(x)
+    item_vars <- diag(var(x))
+    x <- x[which(item_vars > 0)]
+    k0 <- n_pred - ncol(x)
     if (k0 > 0) {
         message(k0, " predictors removed because of zero variance")
-        n_pred <- ncol(predictors)
+        n_pred <- ncol(x)
     }
     # Remove predictors with nonpositive correlation
-    item_corrs <- cor(predictors, criterion)[,1]
+    item_corrs <- cor(x, crit_var)[, 1]
     if (only_positive) {
-        predictors <- predictors[which(item_corrs > 0)]
-        k0 <- n_pred - ncol(predictors)
+        x <- x[which(item_corrs > 0)]
+        k0 <- n_pred - ncol(x)
         if (k0 > 0) {
             message(k0, " predictors removed because of nonpositive correlation with the criterion")
         }
     }
     # Do we still have predictors?
-    if (ncol(predictors) == 0) {
+    if (ncol(x) == 0) {
         warning("no predictors with positive variance/correlation remaining")
         return(NULL)
     }
@@ -88,17 +92,17 @@ pred_sel <- function(predictors, criterion, assoc_measure = c("auc", "cor"), onl
     best_pred <- 0
     old_best_assoc <- 0
     sel_pred_names <- character() # names of selected predictors
-    updated_preds <- remaining_preds <- predictors
-    for (i in 1:ncol(predictors)) {
+    updated_preds <- remaining_preds <- x
+    for (i in 1:ncol(x)) {
         # Add the values of the best predictor from the last step (i-1)
         # to all predictors. Thus, 'updated_preds' are the new
         # candidates for the best sum score.
         updated_preds <- updated_preds + best_pred
         # Compute associations of all remaining predictors with the criterion.
         if (assoc_measure == "auc") {
-            assocs <- compute_aucs(cbind(criterion, updated_preds))
+            assocs <- compute_aucs(cbind(crit_var, updated_preds))
         } else {
-            assocs <- cor(updated_preds, criterion)[,1]
+            assocs <- cor(updated_preds, crit_var)[,1]
         }
         # Select the best predictor from the remaining predictors.
         best_pred_idx <- which.max(assocs)
@@ -131,12 +135,12 @@ pred_sel <- function(predictors, criterion, assoc_measure = c("auc", "cor"), onl
     }
 }
 
-#' Monte Carlo Cross-Validation
+#' Monte Carlo Cross-Validation for Simple Predictor Selection
 #'
-#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [pred_sel].
+#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [sim_pred_sel].
 #'
 #' @param x data frame with predictors
-#' @param criterion criterion (to be predicted variable)
+#' @param criterion (to be predicted variable)
 #' @param n number of Monte Carlo runs (i.e., training/validation samples drawn)
 #' @param assoc_measure type of association measure. May be `auc` (area under the ROC) or `cor` (correlation). For the former, the criterion should be binary (coded for 0, 1 for presence of a feature).
 #' @param only_positive consider only predictors with positive correlations with the criterion?
@@ -151,43 +155,125 @@ pred_sel <- function(predictors, criterion, assoc_measure = c("auc", "cor"), onl
 #' The components are vectors with each value representing the result of one Monte Carlo run.
 #'
 #' @references Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. *Chemometrics and Intelligent Laboratory Systems*, *56*(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2
-
+#'
 #' @export
-mc_crossvalidation <- function(x, criterion, n = 100L, assoc_measure = c("auc", "cor"), only_positive = TRUE, show_progress = FALSE) {
+mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("auc", "cor"), only_positive = TRUE, show_progress = FALSE) {
     assoc_measure <- match.arg(assoc_measure)
-    stopifnot(is.data.frame(x), is.atomic(criterion), is.numeric(n), n > 0)
+    stopifnot(is.data.frame(x),
+        is.character(criterion), criterion %in% names(x),
+        is.numeric(n), n > 0)
     k <- numeric(n)
-    assoc <- numeric(n)
+    assoc_train <- numeric(n)
     assoc_valid <- numeric(n)
     for (i in 1:n) {
-        mysplit <- splitTools::partition(criterion,
+        mysplit <- splitTools::partition(x[[criterion]],
             p = c(train = 0.5, valid = 0.5))
         train_x <- x[mysplit$train,]
-        criterion_train <- criterion[mysplit$train]
         valid_x <- x[mysplit$valid,]
-        criterion_valid <- criterion[mysplit$valid]
-        res <- pred_sel(train_x, criterion_train,
+        res <- sim_pred_sel(train_x, criterion,
             assoc_measure = assoc_measure,
             only_positive = only_positive,
             show_progress = show_progress)
         if (is.null(res$k)) {
             warning("No results for predictor selection in MC iteration step ", i)
             k[i] <- 0
-            assoc[i] <- NA
+            assoc_train[i] <- NA
             y <- NA
             assoc_valid[i] <- NA
         } else {
             k[i] <- res$k
-            assoc[i] <- res$assoc
+            assoc_train[i] <- res$assoc
             y <- rowSums(valid_x[res$sel_pred_names])
             if (assoc_measure == "auc") {
-                stopifnot(all(criterion %in% c(0, 1)))
-                assoc_valid[i] <- pROC::auc(criterion_valid, y, direction = "<",
+                stopifnot(all(valid_x[[criterion]] %in% c(0, 1)))
+                assoc_valid[i] <- pROC::auc(valid_x[[criterion]], y, direction = "<",
                     quiet = TRUE)
             } else {
-                assoc_valid[i] <- cor(criterion_valid, y)
+                assoc_valid[i] <- cor(valid_x[[criterion]], y)
             }
         }
     }
-    return(list(assoc = assoc, assoc_valid = assoc_valid, k = k))
+    return(list(assoc_train = assoc_train, assoc_valid = assoc_valid, k = k))
 }
+
+#' Monte Carlo Cross-Validation for Predictor Selection with Logistic Regression
+#'
+#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [MASS::stepAIC].
+#'
+#' @param x data frame with predictors
+#' @param criterion character string specifying the criterion (must be in `x`)
+#' @param n number of Monte Carlo runs (i.e., training/validation samples drawn)
+#' @param only_positive keep only predictors with positive regression coefficients during the initial training run in the model?
+#' @param plot_auc plot a histogram of the distribution of the AUC for the validation sample?
+#' @param show_progress show progress?
+#'
+#' @returns A list containing the components
+#'
+#' - `auc_train` (AUCs in the training set),
+#' - `auc_valid` (AUCs in the validation set), and
+#' - `k` (number of predictors identified in each run).
+#'
+#' The components are vectors with each value representing the result of one Monte Carlo run.
+#'
+#' @references Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. *Chemometrics and Intelligent Laboratory Systems*, *56*(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2
+#'
+#' @export
+mc_crossvalidation_logist <- function(x, criterion, n = 100L, only_positive = TRUE, plot_auc = TRUE, show_progress = TRUE) {
+    stopifnot(is.data.frame(x),
+        is.character(criterion), criterion %in% names(x),
+        is.numeric(n), n > 0)
+    k <- numeric(n)
+    auc_train <- numeric(n)
+    auc_valid <- numeric(n)
+    for (i in 1:n) {
+        if (show_progress) cat(i, ".", sep = "")
+        # Create training and validation data frames
+        mysplit <- splitTools::partition(x[[criterion]],
+            p = c(train = 0.5, valid = 0.5))
+        train_x <- x[mysplit$train,]
+        valid_x <- x[mysplit$valid,]
+
+        # GLM training
+        myformula <- reformulate(names(train_x)[names(train_x) != criterion],
+            response = criterion)
+        res <- glm(formula = myformula, family = "binomial", data = train_x)
+        final <- MASS::stepAIC(res, trace = 0)
+        if (only_positive) {
+            # Identify variables with negative coefficients
+            negative_vars <- names(coef(final))[coef(final) < 0]
+            # Exclude the intercept
+            negative_vars <- negative_vars[negative_vars != "(Intercept)"]
+            # Update the model by removing variables with negative coefficients
+            if (length(negative_vars) > 0) {
+                # Notice that the model may now contain *new* negative coefficients
+                final <- update(final, as.formula(paste(". ~ .",
+                    paste(negative_vars, collapse = " - "), sep = " - ")))
+            }
+        }
+
+        # Compute AUC for training data
+        fitted <- predict(final)
+        auc_train[i] <- pROC::auc(train_x[[criterion]], fitted, direction = "<",
+            quiet = TRUE)
+        k[i] <- length(names(coef(final))) - 1
+
+        # Validation
+        fitted <- predict(final, newdata = valid_x)
+        auc_valid[i] <- pROC::auc(valid_x[[criterion]], fitted, direction = "<",
+            quiet = TRUE)
+        if (is.null(k[i]) || k[i] == 0) {
+            warning("k (number of predictors) is 0 in MC iteration step ", i)
+            k[i] <- 0
+            auc_train[i] <- NA
+            auc_valid[i] <- NA
+        }
+    }
+    if (show_progress) cat("\n")
+    if (plot_auc) {
+        cnt <- max( hist(auc_valid, main = "AUC for validation data", xlab = "AUC")$counts )
+        m <- mean(auc_valid)
+        lines(c(m, m), c(-0.5,cnt), col = "red")
+    }
+    return(list(auc_train = auc_train, auc_valid = auc_valid, k = k))
+}
+
