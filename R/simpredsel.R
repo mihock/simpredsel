@@ -1,13 +1,5 @@
-### #' Simple Predictor Selection
-### #'
-### #' Functions for simple (naive) predictor selection and cross-validation
-#### #'
-### #' @name simpredsel
-### #'
 #' @importFrom graphics hist lines
 #' @importFrom stats cor var as.formula coef glm predict reformulate update
-### #' @importFrom splitTools partition
-### #' @importFrom pROC auc
 NULL
 
 #' Compute AUCs for one or more predictors
