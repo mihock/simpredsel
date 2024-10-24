@@ -8,8 +8,10 @@
 \description{
 Functions for simple (naive) predictor selection and cross-validation.
 }
+\details{
+The functions are intended to help in the development of scales consisting of simple sum scores of items, which are potentially predictive for a given binary criterion variable. Such scales are common in clinical research. The central functions are \link{sim_pred_sel} for finding predictors in a set that contribute to the predictive validity of the sum score and \link{mc_crossvalidation_sps} for cross-validating predictor selections with \code{sim_pred_sel}. For comparison, there is also a cross-validation function that uses stepwise logistic regression for finding predictors, see \link{mc_crossvalidation_logist}.
+}
 \author{
 \strong{Maintainer}: Michael Hock \email{michael.hock@uni-bamberg.de} (\href{https://orcid.org/0000-0003-1038-3431}{ORCID})
 
 }
-\keyword{internal}

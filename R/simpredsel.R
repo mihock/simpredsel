@@ -1,7 +1,3 @@
-#' @importFrom graphics hist lines
-#' @importFrom stats cor var as.formula coef glm predict reformulate update
-NULL
-
 #' Compute AUCs for one or more predictors
 #'
 #' Compute AUCs (areas under the receiver operating characteristic curve) for the first component of `x` as response and each of its remainings components as predictors. The first component must be binary (coded as 0 for absence, and 1 for presence of a feature). The computation is done via [pROC::auc()].
@@ -62,7 +58,7 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
     x <- x[which(item_vars > 0)]
     k0 <- n_pred - ncol(x)
     if (k0 > 0) {
-        message(k0, " predictors removed because of zero variance")
+        message(k0, " predictor(s) removed because of zero variance")
         n_pred <- ncol(x)
     }
     # Remove predictors with nonpositive correlation
@@ -71,7 +67,7 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
         x <- x[which(item_corrs > 0)]
         k0 <- n_pred - ncol(x)
         if (k0 > 0) {
-            message(k0, " predictors removed because of nonpositive correlation with the criterion")
+            message(k0, " predictor(s) removed because of nonpositive correlation with the criterion")
         }
     }
     # Do we still have predictors?
