@@ -22,7 +22,7 @@ compute_aucs <- function(x) {
 #'
 #' @details The search for predictors is done by a forward selection procedure. The procedure starts with selecting the predictor with the highest validity (association with the criterion) and then successively adds predictors to the selected set that maximize the *incremental* validity of the sum score.
 #'
-#' Association may be measured by the area under the ROC curve or by the correlation coefficient. All predictors should be coded in the same direction as the criterion, so that the correlation between the predictor and the criterion is positive.
+#' Association may be measured by the area under the ROC curve (AUC) or by the correlation coefficient. All predictors should be coded in the same direction as the criterion, so that the correlation between the predictor and the criterion is positive. When the association is measured by the AUC, the criterion should be binary, with its values coded 0 or 1.
 #'
 #' By default, predictors with nonpositive correlations with the criterion are eliminated from the predictor set. Predictors with no variance are also removed.
 #'
@@ -184,21 +184,21 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
     return(list(assoc_train = assoc_train, assoc_valid = assoc_valid, k = k))
 }
 
-#' Monte Carlo Cross-Validation for Predictor Selection with Logistic Regression
+#' Monte Carlo Cross-Validation for Predictor Selection with Linear or Logistic Regression
 #'
-#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [MASS::stepAIC].
+#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [MASS::stepAIC]. The use of ordinary or logistic regression depends on the criterion values. Logistic regression is used when the criterion values are coded with 0 and 1. Otherwise, ordinary regression is used.
 #'
-#' @param x data frame with predictors
+#' @param x data frame containing predictors and criterion
 #' @param criterion character string specifying the criterion (must be in `x`)
 #' @param n number of Monte Carlo runs (i.e., training/validation samples drawn)
 #' @param only_positive keep only predictors with positive regression coefficients during the initial training run in the model?
-#' @param plot_auc plot a histogram of the distribution of the AUC for the validation sample?
+#' @param plot_auc plot a histogram of the distribution of the AUC for the validation sample? This works only for binary criterion variables.
 #' @param show_progress show progress?
 #'
 #' @returns A list containing the components
 #'
-#' - `auc_train` (AUCs in the training set),
-#' - `auc_valid` (AUCs in the validation set), and
+#' - `assoc_train` (associations in the training set),
+#' - `assoc_valid` (associations in the validation set), and
 #' - `k` (number of predictors identified in each run).
 #'
 #' The components are vectors with each value representing the result of one Monte Carlo run.
@@ -206,13 +206,23 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
 #' @references Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. *Chemometrics and Intelligent Laboratory Systems*, *56*(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2
 #'
 #' @export
-mc_crossvalidation_logist <- function(x, criterion, n = 100L, only_positive = TRUE, plot_auc = TRUE, show_progress = TRUE) {
+mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive = TRUE, plot_auc = TRUE, show_progress = TRUE) {
     stopifnot(is.data.frame(x),
         is.character(criterion), criterion %in% names(x),
         is.numeric(n), n > 0)
+    logistic <- FALSE
+    if (all(x[[criterion]] %in% c(0, 1))) {
+        logistic <- TRUE
+    }
+    if (logistic) {
+        message("Using logistic regression.")
+    } else {
+        message("Using ordinary regression.")
+    }
+
     k <- numeric(n)
-    auc_train <- numeric(n)
-    auc_valid <- numeric(n)
+    assoc_train <- numeric(n)
+    assoc_valid <- numeric(n)
     for (i in 1:n) {
         if (show_progress) cat(i, ".", sep = "")
         # Create training and validation data frames
@@ -221,10 +231,14 @@ mc_crossvalidation_logist <- function(x, criterion, n = 100L, only_positive = TR
         train_x <- x[mysplit$train,]
         valid_x <- x[mysplit$valid,]
 
-        # GLM training
+        # Training
         myformula <- reformulate(names(train_x)[names(train_x) != criterion],
             response = criterion)
-        res <- glm(formula = myformula, family = "binomial", data = train_x)
+        if (logistic) {
+            res <- glm(formula = myformula, family = "binomial", data = train_x)
+        } else {
+            res <- lm(formula = myformula, data = train_x)
+        }
         final <- MASS::stepAIC(res, trace = 0)
         if (only_positive) {
             # Identify variables with negative coefficients
@@ -239,29 +253,49 @@ mc_crossvalidation_logist <- function(x, criterion, n = 100L, only_positive = TR
             }
         }
 
-        # Compute AUC for training data
+        # Compute assoc for training data
         fitted <- predict(final)
-        auc_train[i] <- pROC::auc(train_x[[criterion]], fitted, direction = "<",
-            quiet = TRUE)
+        if (logistic) {
+            assoc_train[i] <- pROC::auc(train_x[[criterion]], fitted, direction = "<",
+                quiet = TRUE)
+        } else {
+            assoc_train[i] <- cor(train_x[[criterion]], fitted)
+            #####
+            ####### include R2 from model
+            # su <- summary(final)
+            # R2 <- su$r.squared
+            # adjR2 <- su$adj.r.squared
+        }
         k[i] <- length(names(coef(final))) - 1
 
         # Validation
         fitted <- predict(final, newdata = valid_x)
-        auc_valid[i] <- pROC::auc(valid_x[[criterion]], fitted, direction = "<",
-            quiet = TRUE)
+        if (logistic) {
+            assoc_valid[i] <- pROC::auc(valid_x[[criterion]], fitted, direction = "<",
+                quiet = TRUE)
+        } else {
+            assoc_valid[i] <- cor(valid_x[[criterion]], fitted)
+            #####
+            ####### include R2 from model
+            # su <- summary(final)
+            # R2 <- su$r.squared
+            # adjR2 <- su$adj.r.squared
+        }
         if (is.null(k[i]) || k[i] == 0) {
             warning("k (number of predictors) is 0 in MC iteration step ", i)
             k[i] <- 0
-            auc_train[i] <- NA
-            auc_valid[i] <- NA
+            assoc_train[i] <- NA
+            assoc_valid[i] <- NA
         }
     }
     if (show_progress) cat("\n")
-    if (plot_auc) {
-        cnt <- max( hist(auc_valid, main = "AUC for validation data", xlab = "AUC")$counts )
-        m <- mean(auc_valid)
-        lines(c(m, m), c(-0.5,cnt), col = "red")
+    if (logistic) {
+        if (plot_auc) {
+            cnt <- max( hist(assoc_valid, main = "AUC for validation data", xlab = "AUC")$counts )
+            m <- mean(assoc_valid)
+            lines(c(m, m), c(-0.5,cnt), col = "red")
+        }
     }
-    return(list(auc_train = auc_train, auc_valid = auc_valid, k = k))
+    return(list(assoc_train = assoc_train, assoc_valid = assoc_valid, k = k))
 }
 

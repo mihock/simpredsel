@@ -40,7 +40,7 @@ Find predictors in a set that contribute to the predictive validity of the sum s
 \details{
 The search for predictors is done by a forward selection procedure. The procedure starts with selecting the predictor with the highest validity (association with the criterion) and then successively adds predictors to the selected set that maximize the \emph{incremental} validity of the sum score.
 
-Association may be measured by the area under the ROC curve or by the correlation coefficient. All predictors should be coded in the same direction as the criterion, so that the correlation between the predictor and the criterion is positive.
+Association may be measured by the area under the ROC curve (AUC) or by the correlation coefficient. All predictors should be coded in the same direction as the criterion, so that the correlation between the predictor and the criterion is positive. When the association is measured by the AUC, the criterion should be binary, with its values coded 0 or 1.
 
 By default, predictors with nonpositive correlations with the criterion are eliminated from the predictor set. Predictors with no variance are also removed.
 }
