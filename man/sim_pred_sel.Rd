@@ -13,11 +13,11 @@ sim_pred_sel(
 )
 }
 \arguments{
-\item{x}{data frame of predictor variables}
+\item{x}{data frame containing predictors and criterion}
 
-\item{criterion}{a numeric vector representing the criterion (dependent variable)}
+\item{criterion}{character string specifying the criterion (must be in \code{x})}
 
-\item{assoc_measure}{type of association measure. May be \code{auc} (area under the ROC) or \code{cor} (correlation). For the former, the criterion should be binary (coded 0 for absence, 1 for presence of a feature).}
+\item{assoc_measure}{type of association measure. May be \code{auc} (area under the ROC) or \code{cor} (correlation). For the former, the criterion must be binary (coded 0 for absence, 1 for presence of a feature).}
 
 \item{only_positive}{consider only predictors with positive correlations with the criterion?}
 
@@ -38,9 +38,9 @@ If no valid predictors are found NULL is returned.
 Find predictors in a set that contribute to the predictive validity of the sum score of the selected predictors.
 }
 \details{
-The search for predictors is done by a forward selection procedure. The procedure starts with selecting the predictor with the highest validity (association with the criterion) and then successively adds predictors to the selected set that maximize the \emph{incremental} validity of the sum score.
+The search for predictors is done by forward selection. The procedure starts with selecting the predictor with the highest validity (i.e., highest association with the criterion) and then successively adds predictors to the selected set that maximize the \emph{incremental} validity of the sum score.
 
-Association may be measured by the area under the ROC curve (AUC) or by the correlation coefficient. All predictors should be coded in the same direction as the criterion, so that the correlation between the predictor and the criterion is positive. When the association is measured by the AUC, the criterion should be binary, with its values coded 0 or 1.
+Association may be measured by the area under the ROC curve (AUC) or by the correlation coefficient. All predictors should be coded in the same direction as the criterion, so that the correlation between the predictor and the criterion is positive. When the association is measured by the AUC, the criterion should be binary, with its values coded 0 or 1 (indicator coding).
 
-By default, predictors with nonpositive correlations with the criterion are eliminated from the predictor set. Predictors with no variance are also removed.
+By default, predictors with nonpositive correlations with the criterion are removed from the predictor set. Predictors with no variance are also removed.
 }

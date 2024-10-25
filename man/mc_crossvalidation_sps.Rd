@@ -14,9 +14,9 @@ mc_crossvalidation_sps(
 )
 }
 \arguments{
-\item{x}{data frame with predictors}
+\item{x}{data frame containing predictors and criterion}
 
-\item{criterion}{(to be predicted variable)}
+\item{criterion}{character string specifying the criterion (must be in \code{x})}
 
 \item{n}{number of Monte Carlo runs (i.e., training/validation samples drawn)}
 

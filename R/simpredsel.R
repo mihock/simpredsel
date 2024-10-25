@@ -20,15 +20,15 @@ compute_aucs <- function(x) {
 #'
 #' Find predictors in a set that contribute to the predictive validity of the sum score of the selected predictors.
 #'
-#' @details The search for predictors is done by a forward selection procedure. The procedure starts with selecting the predictor with the highest validity (association with the criterion) and then successively adds predictors to the selected set that maximize the *incremental* validity of the sum score.
+#' @details The search for predictors is done by forward selection. The procedure starts with selecting the predictor with the highest validity (i.e., highest association with the criterion) and then successively adds predictors to the selected set that maximize the *incremental* validity of the sum score.
 #'
-#' Association may be measured by the area under the ROC curve (AUC) or by the correlation coefficient. All predictors should be coded in the same direction as the criterion, so that the correlation between the predictor and the criterion is positive. When the association is measured by the AUC, the criterion should be binary, with its values coded 0 or 1.
+#' Association may be measured by the area under the ROC curve (AUC) or by the correlation coefficient. All predictors should be coded in the same direction as the criterion, so that the correlation between the predictor and the criterion is positive. When the association is measured by the AUC, the criterion should be binary, with its values coded 0 or 1 (indicator coding).
 #'
-#' By default, predictors with nonpositive correlations with the criterion are eliminated from the predictor set. Predictors with no variance are also removed.
+#' By default, predictors with nonpositive correlations with the criterion are removed from the predictor set. Predictors with no variance are also removed.
 #'
-#' @param x data frame of predictor variables
-#' @param criterion a numeric vector representing the criterion (dependent variable)
-#' @param assoc_measure type of association measure. May be `auc` (area under the ROC) or `cor` (correlation). For the former, the criterion should be binary (coded 0 for absence, 1 for presence of a feature).
+#' @param x data frame containing predictors and criterion
+#' @param criterion character string specifying the criterion (must be in `x`)
+#' @param assoc_measure type of association measure. May be `auc` (area under the ROC) or `cor` (correlation). For the former, the criterion must be binary (coded 0 for absence, 1 for presence of a feature).
 #' @param only_positive consider only predictors with positive correlations with the criterion?
 #' @param show_progress show progress?
 #'
@@ -127,8 +127,8 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
 #'
 #' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [sim_pred_sel].
 #'
-#' @param x data frame with predictors
-#' @param criterion (to be predicted variable)
+#' @param x data frame containing predictors and criterion
+#' @param criterion character string specifying the criterion (must be in `x`)
 #' @param n number of Monte Carlo runs (i.e., training/validation samples drawn)
 #' @param assoc_measure type of association measure. May be `auc` (area under the ROC) or `cor` (correlation). For the former, the criterion should be binary (coded for 0, 1 for presence of a feature).
 #' @param only_positive consider only predictors with positive correlations with the criterion?
@@ -181,12 +181,12 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
             }
         }
     }
-    return(list(assoc_train = assoc_train, assoc_valid = assoc_valid, k = k))
+    return(list(assoc_measure = assoc_measure, assoc_train = assoc_train, assoc_valid = assoc_valid, k = k))
 }
 
 #' Monte Carlo Cross-Validation for Predictor Selection with Linear or Logistic Regression
 #'
-#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [MASS::stepAIC]. The use of ordinary or logistic regression depends on the criterion values. Logistic regression is used when the criterion values are coded with 0 and 1. Otherwise, ordinary regression is used.
+#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [MASS::stepAIC]. The use of ordinary or logistic regression depends on the criterion values. Logistic regression is used when the criterion values are binary and coded with 0 and 1. Otherwise, ordinary regression is used.
 #'
 #' @param x data frame containing predictors and criterion
 #' @param criterion character string specifying the criterion (must be in `x`)
@@ -296,6 +296,7 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
             lines(c(m, m), c(-0.5,cnt), col = "red")
         }
     }
-    return(list(assoc_train = assoc_train, assoc_valid = assoc_valid, k = k))
+    return(list(method = ifelse(logistic, "logistic regression", "ordinary regression"),
+        assoc_train = assoc_train, assoc_valid = assoc_valid, k = k))
 }
 
