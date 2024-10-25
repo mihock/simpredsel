@@ -124,7 +124,7 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
     ##### ??? old_best_assoc?
     # Output / all predictors processed
     names(best_assoc) <- "assoc"
-    output <- list(k = i - 1,
+    output <- list(k = length(sel_pred_names),
         assoc = best_assoc,
         sel_pred_names = sel_pred_names,
         final_sum_score = final_sum_score)
