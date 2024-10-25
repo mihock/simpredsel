@@ -9,7 +9,7 @@ mc_crossvalidation_regression(
   criterion,
   n = 100L,
   only_positive = TRUE,
-  plot_auc = TRUE,
+  plot = TRUE,
   show_progress = TRUE
 )
 }
@@ -22,7 +22,7 @@ mc_crossvalidation_regression(
 
 \item{only_positive}{keep only predictors with positive regression coefficients during the initial training run in the model?}
 
-\item{plot_auc}{plot a histogram of the distribution of the AUC for the validation sample? This works only for binary criterion variables.}
+\item{plot}{plot a histogram of the distribution of the associations for the validation sample?}
 
 \item{show_progress}{show progress?}
 }

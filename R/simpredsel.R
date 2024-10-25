@@ -192,7 +192,7 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
 #' @param criterion character string specifying the criterion (must be in `x`)
 #' @param n number of Monte Carlo runs (i.e., training/validation samples drawn)
 #' @param only_positive keep only predictors with positive regression coefficients during the initial training run in the model?
-#' @param plot_auc plot a histogram of the distribution of the AUC for the validation sample? This works only for binary criterion variables.
+#' @param plot plot a histogram of the distribution of the associations for the validation sample?
 #' @param show_progress show progress?
 #'
 #' @returns A list containing the components
@@ -206,7 +206,7 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
 #' @references Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. *Chemometrics and Intelligent Laboratory Systems*, *56*(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2
 #'
 #' @export
-mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive = TRUE, plot_auc = TRUE, show_progress = TRUE) {
+mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive = TRUE, plot = TRUE, show_progress = TRUE) {
     stopifnot(is.data.frame(x),
         is.character(criterion), criterion %in% names(x),
         is.numeric(n), n > 0)
@@ -289,9 +289,13 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
         }
     }
     if (show_progress) cat("\n")
-    if (logistic) {
-        if (plot_auc) {
+    if (plot) {
+        if (logistic) {
             cnt <- max( hist(assoc_valid, main = "AUC for validation data", xlab = "AUC")$counts )
+            m <- mean(assoc_valid)
+            lines(c(m, m), c(-0.5,cnt), col = "red")
+        } else {
+            cnt <- max( hist(assoc_valid, main = "Correlation for validation data", xlab = "Correlation")$counts )
             m <- mean(assoc_valid)
             lines(c(m, m), c(-0.5,cnt), col = "red")
         }
