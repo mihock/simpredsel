@@ -254,9 +254,9 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
             negative_vars <- names(coef(final))[coef(final) < 0]
             # Exclude the intercept
             negative_vars <- negative_vars[negative_vars != "(Intercept)"]
-            neg_vars_excluded <- length(negative_vars)
+            neg_vars_excluded[i] <- length(negative_vars)
             # Update the model by removing variables with negative coefficients
-            if (neg_vars_excluded > 0) {
+            if (neg_vars_excluded[i] > 0) {
                 # Notice that the model may now contain *new* negative coefficients
                 final <- update(final, as.formula(paste(". ~ .",
                     paste(negative_vars, collapse = " - "), sep = " - ")))
