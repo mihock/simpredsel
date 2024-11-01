@@ -208,7 +208,7 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
 #' - `assoc_train` (associations in the training set),
 #' - `assoc_valid` (associations in the validation set), and
 #' - `k` (number of predictors identified in each run).
-#' - `neg_vars_excluded` (number of variables yielding negative regression coefficients; only used if `only_positive` is TRUE)
+#' - `neg_vars_excluded` (number of variables excluded due to negative regression coefficient)
 #'
 #' The components are vectors with each value representing the result of one Monte Carlo run.
 #'

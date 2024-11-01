@@ -32,7 +32,7 @@ A list containing the components
 \item \code{assoc_train} (associations in the training set),
 \item \code{assoc_valid} (associations in the validation set), and
 \item \code{k} (number of predictors identified in each run).
-\item \code{neg_vars_excluded} (number of variables yielding negative regression coefficients; only used if \code{only_positive} is TRUE)
+\item \code{neg_vars_excluded} (number of variables excluded due to negative regression coefficient)
 }
 
 The components are vectors with each value representing the result of one Monte Carlo run.
