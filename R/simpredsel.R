@@ -231,6 +231,7 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
     k <- numeric(n)
     assoc_train <- numeric(n)
     assoc_valid <- numeric(n)
+    neg_vars_excluded <- numeric(n)
     for (i in 1:n) {
         if (show_progress) cat(i, ".", sep = "")
         # Create training and validation data frames
@@ -253,8 +254,9 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
             negative_vars <- names(coef(final))[coef(final) < 0]
             # Exclude the intercept
             negative_vars <- negative_vars[negative_vars != "(Intercept)"]
+            neg_vars_excluded <- length(negative_vars)
             # Update the model by removing variables with negative coefficients
-            if (length(negative_vars) > 0) {
+            if (neg_vars_excluded > 0) {
                 # Notice that the model may now contain *new* negative coefficients
                 final <- update(final, as.formula(paste(". ~ .",
                     paste(negative_vars, collapse = " - "), sep = " - ")))
@@ -309,6 +311,7 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
         }
     }
     return(list(method = ifelse(logistic, "logistic regression", "ordinary regression"),
-        assoc_train = assoc_train, assoc_valid = assoc_valid, k = k))
+        assoc_train = assoc_train, assoc_valid = assoc_valid,
+        k = k, neg_vars_excluded = neg_vars_excluded))
 }
 
