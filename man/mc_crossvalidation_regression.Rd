@@ -37,7 +37,7 @@ A list containing the components
 The components are vectors with each value representing the result of one Monte Carlo run.
 }
 \description{
-Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with \link[MASS:stepAIC]{MASS::stepAIC}. The use of ordinary or logistic regression depends on the criterion values. Logistic regression is used when the criterion values are binary and coded with 0 and 1. Otherwise, ordinary regression is used.
+Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with \link[stats:step]{stats::step}. The use of ordinary or logistic regression depends on the criterion values. Logistic regression is used when the criterion values are binary and coded with 0 and 1. Otherwise, ordinary regression is used.
 }
 \references{
 Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. \emph{Chemometrics and Intelligent Laboratory Systems}, \emph{56}(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2

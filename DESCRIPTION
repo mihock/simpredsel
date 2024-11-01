@@ -9,7 +9,6 @@ Description: Functions for simple (naive) predictor selection and
     cross-validation.
 License: MIT + file LICENSE
 Imports: 
-    MASS,
     pROC,
     splitTools
 Encoding: UTF-8

@@ -194,7 +194,7 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
 
 #' Monte Carlo Cross-Validation for Predictor Selection with Linear or Logistic Regression
 #'
-#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [MASS::stepAIC]. The use of ordinary or logistic regression depends on the criterion values. Logistic regression is used when the criterion values are binary and coded with 0 and 1. Otherwise, ordinary regression is used.
+#' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [stats::step]. The use of ordinary or logistic regression depends on the criterion values. Logistic regression is used when the criterion values are binary and coded with 0 and 1. Otherwise, ordinary regression is used.
 #'
 #' @param x data frame containing predictors and criterion
 #' @param criterion character string specifying the criterion (must be in `x`)
@@ -247,7 +247,7 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
         } else {
             res <- lm(formula = myformula, data = train_x)
         }
-        final <- MASS::stepAIC(res, trace = 0)
+        final <- stats::step(res, trace = 0)
         if (only_positive) {
             # Identify variables with negative coefficients
             negative_vars <- names(coef(final))[coef(final) < 0]

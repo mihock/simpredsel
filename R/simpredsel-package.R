@@ -4,6 +4,6 @@
 
 ## usethis namespace: start
 #' @importFrom graphics hist lines
-#' @importFrom stats cor var as.formula coef glm predict reformulate update lm
+#' @importFrom stats cor var as.formula coef glm predict reformulate update lm step
 ## usethis namespace: end
 NULL
