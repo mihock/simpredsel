@@ -20,7 +20,7 @@ mc_crossvalidation_regression(
 
 \item{n}{number of Monte Carlo runs (i.e., training/validation samples drawn)}
 
-\item{only_positive}{keep only predictors with positive regression coefficients during the initial training run in the model?}
+\item{only_positive}{keep only predictors with positive regression coefficients in the training run in the model?}
 
 \item{plot}{plot a histogram of the distribution of the associations for the validation sample?}
 
@@ -32,7 +32,7 @@ A list containing the components
 \item \code{assoc_train} (associations in the training set),
 \item \code{assoc_valid} (associations in the validation set), and
 \item \code{k} (number of predictors identified in each run).
-\item \code{neg_vars_excluded} (number of variables excluded due to negative regression coefficient)
+\item \code{neg_vars_excluded} (number of variables excluded due to negative regression coefficients)
 }
 
 The components are vectors with each value representing the result of one Monte Carlo run.

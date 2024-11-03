@@ -208,7 +208,7 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
 #' - `assoc_train` (associations in the training set),
 #' - `assoc_valid` (associations in the validation set), and
 #' - `k` (number of predictors identified in each run).
-#' - `neg_vars_excluded` (number of variables excluded due to negative regression coefficients)
+#' - `nonpos_vars_excluded` (number of variables excluded due to nonpositive regression coefficients)
 #'
 #' The components are vectors with each value representing the result of one Monte Carlo run.
 #'
@@ -232,7 +232,7 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
     k <- numeric(n)
     assoc_train <- numeric(n)
     assoc_valid <- numeric(n)
-    neg_vars_excluded <- numeric(n)
+    nonpos_vars_excluded <- numeric(n)
     for (i in 1:n) {
         if (show_progress) cat(i, ".", sep = "")
         # Create training and validation data frames
@@ -251,16 +251,17 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
         }
         final <- stats::step(res, trace = 0)
         if (only_positive) {
-            # Identify variables with negative coefficients
-            negative_vars <- names(coef(final))[coef(final) < 0]
+            # Identify variables with nonpositive coefficients
+            nonpositive_vars <- names(coef(final))[coef(final) <= 0]
             # Exclude the intercept
-            negative_vars <- negative_vars[negative_vars != "(Intercept)"]
-            neg_vars_excluded[i] <- length(negative_vars)
-            # Update the model by removing variables with negative coefficients
-            if (neg_vars_excluded[i] > 0) {
-                # Notice that the model may now contain *new* negative coefficients
+            nonpositive_vars <- nonpositive_vars[nonpositive_vars != "(Intercept)"]
+            nonpos_vars_excluded[i] <- length(nonpositive_vars)
+
+            # Update the model by removing variables with nonpositive coefficients
+            if (nonpos_vars_excluded[i] > 0) {
+                # Notice that the model may now contain *new* nonpositive coefficients
                 final <- update(final, as.formula(paste(". ~ .",
-                    paste(negative_vars, collapse = " - "), sep = " - ")))
+                    paste(nonpositive_vars, collapse = " - "), sep = " - ")))
             }
         }
 
@@ -271,11 +272,6 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
                 quiet = TRUE)
         } else {
             assoc_train[i] <- cor(train_x[[criterion]], fitted)
-            #####
-            ####### include R2 from model
-            # su <- summary(final)
-            # R2 <- su$r.squared
-            # adjR2 <- su$adj.r.squared
         }
         k[i] <- length(names(coef(final))) - 1
 
@@ -286,11 +282,6 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
                 quiet = TRUE)
         } else {
             assoc_valid[i] <- cor(valid_x[[criterion]], fitted)
-            #####
-            ####### include R2 from model
-            # su <- summary(final)
-            # R2 <- su$r.squared
-            # adjR2 <- su$adj.r.squared
         }
         if (is.null(k[i]) || k[i] == 0) {
             warning("k (number of predictors) is 0 in MC iteration step ", i)
@@ -313,6 +304,6 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
     }
     return(list(method = ifelse(logistic, "logistic regression", "ordinary regression"),
         assoc_train = assoc_train, assoc_valid = assoc_valid,
-        k = k, neg_vars_excluded = neg_vars_excluded))
+        k = k, nonpos_vars_excluded = nonpos_vars_excluded))
 }
 
