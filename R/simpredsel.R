@@ -199,7 +199,7 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
 #' @param x data frame containing predictors and criterion
 #' @param criterion character string specifying the criterion (must be in `x`)
 #' @param n number of Monte Carlo runs (i.e., training/validation samples drawn)
-#' @param only_positive keep only predictors with positive regression coefficients during the initial training run in the model?
+#' @param only_positive keep only predictors with positive regression coefficients in the training run in the model?
 #' @param plot plot a histogram of the distribution of the associations for the validation sample?
 #' @param show_progress show progress?
 #'
@@ -208,7 +208,7 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
 #' - `assoc_train` (associations in the training set),
 #' - `assoc_valid` (associations in the validation set), and
 #' - `k` (number of predictors identified in each run).
-#' - `neg_vars_excluded` (number of variables excluded due to negative regression coefficient)
+#' - `neg_vars_excluded` (number of variables excluded due to negative regression coefficients)
 #'
 #' The components are vectors with each value representing the result of one Monte Carlo run.
 #'
