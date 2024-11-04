@@ -5,7 +5,7 @@ Version: 0.1
 Authors@R: 
     person("Michael", "Hock", , "michael.hock@uni-bamberg.de", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-1038-3431"))
-Description: Functions for simple (naive) predictor selection and
+Description: Functions for simple predictor selection and
     cross-validation.
 License: MIT + file LICENSE
 Imports: 
