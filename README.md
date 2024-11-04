@@ -13,7 +13,7 @@ For purposes of comparison, there is also a cross-validation function that uses 
 
 ## Installation
 
-You can install simpredsel from [GitHub](https://github.com/) with:
+You can install `simpredsel` from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("pak")
