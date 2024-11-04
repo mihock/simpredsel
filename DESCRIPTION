@@ -1,7 +1,7 @@
 Type: Package
 Package: simpredsel
 Title: Simple Predictor Selection
-Version: 0.1
+Version: 0.8
 Authors@R: 
     person("Michael", "Hock", , "michael.hock@uni-bamberg.de", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-1038-3431"))
