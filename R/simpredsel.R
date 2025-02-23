@@ -30,7 +30,7 @@ compute_aucs <- function(x) {
 #' @param criterion character string specifying the criterion (must be in `x`)
 #' @param assoc_measure type of association measure. May be `auc` (area under the ROC) or `cor` (correlation). For the former, the criterion must be binary (coded 0 for absence, 1 for presence of a feature).
 #' @param only_positive consider only predictors with positive correlations with the criterion?
-#' @param delta_val minimum validity increment that a chosen predictor must reach.
+#' @param delta_val minimum validity increment that a chosen predictor must reach
 #' @param show_progress show progress?
 #'
 #' @returns A list containing the components
@@ -141,7 +141,7 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
 #' @param n number of Monte Carlo runs (i.e., training/validation samples drawn)
 #' @param assoc_measure type of association measure. May be `auc` (area under the ROC) or `cor` (correlation). For the former, the criterion should be binary (coded for 0, 1 for presence of a feature).
 #' @param only_positive consider only predictors with positive correlations with the criterion?
-#' @param delta_val minimum validity increment that a chosen predictor must reach.
+#' @param delta_val minimum validity increment that a chosen predictor must reach
 #' @param show_progress show progress?
 #'
 #' @returns A list containing the components
