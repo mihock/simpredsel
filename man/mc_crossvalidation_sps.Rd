@@ -10,6 +10,7 @@ mc_crossvalidation_sps(
   n = 100L,
   assoc_measure = c("auc", "cor"),
   only_positive = TRUE,
+  delta_val = 0,
   show_progress = FALSE
 )
 }
@@ -23,6 +24,8 @@ mc_crossvalidation_sps(
 \item{assoc_measure}{type of association measure. May be \code{auc} (area under the ROC) or \code{cor} (correlation). For the former, the criterion should be binary (coded for 0, 1 for presence of a feature).}
 
 \item{only_positive}{consider only predictors with positive correlations with the criterion?}
+
+\item{delta_val}{minimum validity increment that a chosen predictor must reach.}
 
 \item{show_progress}{show progress?}
 }
