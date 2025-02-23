@@ -77,6 +77,7 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
     }
 
     # Main loop
+    final_sum_score <- -1
     best_pred <- 0
     old_best_assoc <- 0
     sel_pred_names <- character() # names of selected predictors
