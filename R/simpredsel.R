@@ -102,11 +102,14 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
         # Return if there is no validity increment of at least delta_val
         if (best_assoc <= (old_best_assoc + delta_val)) {
             names(old_best_assoc) <- "assoc"
-            output <- list(k = i - 1,
+            output <- list(
+                k = i - 1,
                 assoc = old_best_assoc,
                 sel_pred_names = sel_pred_names,
-                final_sum_score = final_sum_score)
-            return(output)
+                final_sum_score = final_sum_score
+            )
+            class(output) <- c("sim_pred_sel", class(output))
+            invisible(output)
         } else {
             if (i == 1) {
                 sel_pred_names <- best_pred_name
@@ -125,16 +128,22 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
     }
     # Output / all predictors processed
     names(best_assoc) <- "assoc"
-    output <- list(k = length(sel_pred_names),
+    output <- list(
+        k = length(sel_pred_names),
         assoc = best_assoc,
         sel_pred_names = sel_pred_names,
-        final_sum_score = final_sum_score)
+        final_sum_score = final_sum_score
+    )
     class(output) <- c("sim_pred_sel", class(output))
-    return(output)
+    invisible(output)
 }
 
+### Not working anymore?
+### @method print sim_pred_sel
+### @noRd
+#' @export
 print.sim_pred_sel <- function(x, ...) {
-    cat("k = ", x$k, "\nassociation = ", round(x$assoc, 3), "\n")
+    cat("k = ", x$k, ", association = ", round(x$assoc, 3), "\n", sep = "")
 }
 
 #' Monte Carlo Cross-Validation for Simple Predictor Selection
