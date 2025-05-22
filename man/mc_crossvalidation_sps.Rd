@@ -25,7 +25,7 @@ mc_crossvalidation_sps(
 
 \item{only_positive}{consider only predictors with positive correlations with the criterion?}
 
-\item{delta_val}{minimum validity increment that a chosen predictor must reach.}
+\item{delta_val}{minimum validity increment that a chosen predictor must reach}
 
 \item{show_progress}{show progress?}
 }
