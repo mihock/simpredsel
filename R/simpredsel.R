@@ -32,6 +32,7 @@ compute_aucs <- function(x) {
 #' @param only_positive consider only predictors with positive correlations with the criterion?
 #' @param delta_val minimum validity increment that a chosen predictor must reach
 #' @param show_progress show progress?
+#' @param show_messages show messages?
 #'
 #' @returns A list containing the components
 #'
@@ -43,7 +44,7 @@ compute_aucs <- function(x) {
 #' If no valid predictors are found NULL is returned.
 #'
 #' @export
-sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_positive = TRUE, delta_val = 0, show_progress = TRUE) {
+sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_positive = TRUE, delta_val = 0, show_progress = TRUE, show_messages = TRUE) {
     assoc_measure <- match.arg(assoc_measure)
     stopifnot(is.data.frame(x),
         is.character(criterion), criterion %in% names(x))
@@ -59,16 +60,19 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
     x <- x[which(item_vars > 0)]
     k0 <- n_pred - ncol(x)
     if (k0 > 0) {
-        message(k0, " predictor(s) removed because of zero variance")
+        if (show_messages) {
+            message(k0, " predictor(s) removed because of zero variance")
+        }
         n_pred <- ncol(x)
     }
     # Remove predictors with nonpositive correlation
     item_corrs <- cor(x, crit_var)[, 1]
     if (only_positive) {
         x <- x[which(item_corrs > 0)]
-        k0 <- n_pred - ncol(x)
-        if (k0 > 0) {
-            message(k0, " predictor(s) removed because of nonpositive correlation with the criterion")
+        if (show_messages) {
+            if ( (n_pred - ncol(x)) > 0 ) {
+                message(k0, " predictor(s) removed because of nonpositive correlation with the criterion")
+            }
         }
     }
     # Do we still have predictors?
@@ -121,8 +125,10 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
         remaining_preds[best_pred_idx] <- updated_preds[best_pred_idx] <- NULL
         old_best_assoc <- best_assoc
         if (show_progress) {
-            myDf <- data.frame(i = i, variable = best_pred_name, assoc = best_assoc,
-                cor_single = item_corrs[best_pred_name])
+            myDf <- data.frame(i = i,
+                variable = best_pred_name,
+                cor_single = item_corrs[best_pred_name],
+                assoc = best_assoc)
             if (i == 1) {
                 progressDf <- myDf
             } else {
@@ -131,7 +137,8 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
         }
     }
     if (show_progress) {
-        print(knitr::kable(progressDf, digits = 3, row.names = FALSE))
+        print(knitr::kable(progressDf, digits = 3, row.names = FALSE,
+            col.names = c("i", "Item", "Correlation/Item", "Association/Sum score")))
     }
     # Output / all predictors processed
     names(best_assoc) <- "assoc"

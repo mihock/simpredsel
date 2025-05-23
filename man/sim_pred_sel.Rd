@@ -10,7 +10,8 @@ sim_pred_sel(
   assoc_measure = c("auc", "cor"),
   only_positive = TRUE,
   delta_val = 0,
-  show_progress = TRUE
+  show_progress = TRUE,
+  show_messages = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ sim_pred_sel(
 \item{delta_val}{minimum validity increment that a chosen predictor must reach}
 
 \item{show_progress}{show progress?}
+
+\item{show_messages}{show messages?}
 }
 \value{
 A list containing the components
