@@ -121,10 +121,17 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
         remaining_preds[best_pred_idx] <- updated_preds[best_pred_idx] <- NULL
         old_best_assoc <- best_assoc
         if (show_progress) {
-            mydf <- data.frame(i = i, variable = best_pred_name, assoc = best_assoc,
+            myDf <- data.frame(i = i, variable = best_pred_name, assoc = best_assoc,
                 cor_single = item_corrs[best_pred_name])
-            print(mydf)
+            if (i == 1) {
+                progressDf <- myDf
+            } else {
+                progressDf <- rbind(progressDf, myDf)
+            }
         }
+    }
+    if (show_progress) {
+        print(knitr::kable(progressDf, digits = 3, row.names = FALSE))
     }
     # Output / all predictors processed
     names(best_assoc) <- "assoc"

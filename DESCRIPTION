@@ -10,7 +10,8 @@ Description: Functions for simple predictor selection and
 License: MIT + file LICENSE
 Imports: 
     pROC,
-    splitTools
+    splitTools,
+    knitr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
