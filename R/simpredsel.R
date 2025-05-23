@@ -70,7 +70,8 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
     if (only_positive) {
         x <- x[which(item_corrs > 0)]
         if (show_messages) {
-            if ( (n_pred - ncol(x)) > 0 ) {
+            k0 <- n_pred - ncol(x)
+            if ( k0 > 0 ) {
                 message(k0, " predictor(s) removed because of nonpositive correlation with the criterion")
             }
         }
@@ -139,6 +140,7 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
     if (show_progress) {
         print(knitr::kable(progressDf, digits = 3, row.names = FALSE,
             col.names = c("i", "Item", "Correlation/Item", "Association/Sum score")))
+        cat("\n")
     }
     # Output / all predictors processed
     names(best_assoc) <- "assoc"
@@ -149,7 +151,8 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
         final_sum_score = final_sum_score
     )
     class(output) <- c("sim_pred_sel", class(output))
-    invisible(output)
+    return(output)
+    # invisible(output)
 }
 
 ### Not working anymore?
