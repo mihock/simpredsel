@@ -225,7 +225,22 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
             }
         }
     }
-    return(list(assoc_measure = assoc_measure, assoc_train = assoc_train, assoc_valid = assoc_valid, k = k))
+    output <- list(assoc_measure = assoc_measure, assoc_train = assoc_train,
+        assoc_valid = assoc_valid, k = k)
+    class(output) <- c("mc_crossvalidation_sps", class(output))
+    return(output)
+}
+
+#' @export
+print.mc_crossvalidation_sps <- function(x, ...) {
+    cat("Measure: ", x$assoc_measure, "\n",
+        "Mean k                = ", round(mean(x$k, na.rm = TRUE), 3), "\n",
+        "SD k                  = ", round(stats::sd(x$k, na.rm = TRUE), 3), "\n",
+        "Mean Assoc/Training   = ", round(mean(x$assoc_train, na.rm = TRUE), 3), "\n",
+        "SD Assoc/Training     = ", round(stats::sd(x$assoc_train, na.rm = TRUE), 3), "\n",
+        "Mean Assoc/Validation = ", round(mean(x$assoc_valid, na.rm = TRUE), 3), "\n",
+        "SD Assoc/Validation   = ", round(stats::sd(x$assoc_valid, na.rm = TRUE), 3), "\n",
+        sep = "")
 }
 
 #' Monte Carlo Cross-Validation for Predictor Selection with Linear or Logistic Regression
