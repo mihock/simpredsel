@@ -11,7 +11,8 @@ mc_crossvalidation_sps(
   assoc_measure = c("auc", "cor"),
   only_positive = TRUE,
   delta_val = 0,
-  show_progress = FALSE
+  show_progress = FALSE,
+  show_messages = FALSE
 )
 }
 \arguments{
@@ -27,7 +28,9 @@ mc_crossvalidation_sps(
 
 \item{delta_val}{minimum validity increment that a chosen predictor must reach}
 
-\item{show_progress}{show progress?}
+\item{show_progress}{show progress from \link{sim_pred_sel}?}
+
+\item{show_messages}{show messages from \link{sim_pred_sel}?}
 }
 \value{
 A list containing the components

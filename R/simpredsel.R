@@ -173,7 +173,8 @@ print.sim_pred_sel <- function(x, ...) {
 #' @param assoc_measure type of association measure. May be `auc` (area under the ROC) or `cor` (correlation). For the former, the criterion should be binary (coded for 0, 1 for presence of a feature).
 #' @param only_positive consider only predictors with positive correlations with the criterion?
 #' @param delta_val minimum validity increment that a chosen predictor must reach
-#' @param show_progress show progress?
+#' @param show_progress show progress from [sim_pred_sel]?
+#' @param show_messages show messages from [sim_pred_sel]?
 #'
 #' @returns A list containing the components
 #'
@@ -186,7 +187,7 @@ print.sim_pred_sel <- function(x, ...) {
 #' @references Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. *Chemometrics and Intelligent Laboratory Systems*, *56*(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2
 #'
 #' @export
-mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("auc", "cor"), only_positive = TRUE, delta_val = 0, show_progress = FALSE) {
+mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("auc", "cor"), only_positive = TRUE, delta_val = 0, show_progress = FALSE, show_messages = FALSE) {
     assoc_measure <- match.arg(assoc_measure)
     stopifnot(is.data.frame(x),
         is.character(criterion), criterion %in% names(x),
@@ -203,7 +204,8 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
             assoc_measure = assoc_measure,
             only_positive = only_positive,
             delta_val = delta_val,
-            show_progress = show_progress)
+            show_progress = show_progress,
+            show_messages = show_messages)
         if (is.null(res$k)) {
             warning("No results for predictor selection in MC iteration step ", i)
             k[i] <- 0
