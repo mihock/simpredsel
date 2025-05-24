@@ -22,7 +22,7 @@ mc_crossvalidation_sps(
 
 \item{n}{number of Monte Carlo runs (i.e., training/validation samples drawn)}
 
-\item{assoc_measure}{type of association measure. May be \code{auc} (area under the ROC) or \code{cor} (correlation). For the former, the criterion should be binary (coded for 0, 1 for presence of a feature).}
+\item{assoc_measure}{type of association measure. May be \code{auc} (area under the ROC) or \code{cor} (correlation). For the former, the criterion should be binary (coded for 0 absence, 1 for presence of a feature).}
 
 \item{only_positive}{consider only predictors with positive correlations with the criterion?}
 
