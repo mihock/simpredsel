@@ -243,6 +243,19 @@ print.mc_crossvalidation_sps <- function(x, ...) {
         sep = "")
 }
 
+#' @export
+plot.mc_crossvalidation_sps <- function(x, ...) {
+    xlab <- ifelse(x$assoc_measure == "auc", "AUC", "Correlation")
+    graphics::barplot(table(x$k), xlab  = "Number of Selected Predictors", ylab = "Frequency")
+    h <- graphics::hist(x$assoc_train, main = "Training", xlab = xlab)
+    m <- mean(x$assoc_train, na.rm = TRUE)
+    lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
+    h <- graphics::hist(x$assoc_valid, main = "Validation", xlab = xlab)
+    m <- mean(x$assoc_valid, na.rm = TRUE)
+    lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
+    message("crossvalidation: added three summary plots (see plot history)")
+}
+
 #' Monte Carlo Cross-Validation for Predictor Selection with Linear or Logistic Regression
 #'
 #' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [stats::step]. The use of ordinary or logistic regression depends on the criterion values. Logistic regression is used when the criterion values are binary and coded with 0 and 1. Otherwise, ordinary regression is used.
