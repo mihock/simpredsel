@@ -178,9 +178,10 @@ print.sim_pred_sel <- function(x, ...) {
 #'
 #' @returns A list containing the components
 #'
+#' - `k` (number of predictors identified in each run),
+#' - `assoc_measure` (type of association measure),
 #' - `assoc` (associations in the training set),
-#' - `assoc_valid` (associations in the validation set), and
-#' - `k` (number of predictors identified in each run).
+#' - `assoc_valid` (associations in the validation set).
 #'
 #' The components are vectors with each value representing the result of one Monte Carlo run.
 #'
@@ -225,8 +226,10 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
             }
         }
     }
-    output <- list(assoc_measure = assoc_measure, assoc_train = assoc_train,
-        assoc_valid = assoc_valid, k = k)
+    output <- list(k = k,
+        assoc_measure = assoc_measure,
+        assoc_train = assoc_train,
+        assoc_valid = assoc_valid)
     class(output) <- c("mc_crossvalidation_sps", class(output))
     return(output)
 }
@@ -264,22 +267,22 @@ plot.mc_crossvalidation_sps <- function(x, ...) {
 #' @param criterion character string specifying the criterion (must be in `x`)
 #' @param n number of Monte Carlo runs (i.e., training/validation samples drawn)
 #' @param only_positive keep only predictors with positive regression coefficients in the training run in the model?
-#' @param plot plot a histogram of the distribution of the associations for the validation sample?
 #' @param show_progress show progress?
 #'
 #' @returns A list containing the components
 #'
+#' - `k` (number of predictors identified in each run),
+#' - `method` (logistic or ordinary regression),
 #' - `assoc_train` (associations in the training set),
-#' - `assoc_valid` (associations in the validation set), and
-#' - `k` (number of predictors identified in each run).
-#' - `nonpos_vars_excluded` (number of variables excluded due to nonpositive regression coefficients)
+#' - `assoc_valid` (associations in the validation set),
+#' - `nonpos_vars_excluded` (number of variables excluded due to nonpositive regression coefficients).
 #'
 #' The components are vectors with each value representing the result of one Monte Carlo run.
 #'
 #' @references Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. *Chemometrics and Intelligent Laboratory Systems*, *56*(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2
 #'
 #' @export
-mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive = TRUE, plot = TRUE, show_progress = TRUE) {
+mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive = TRUE,  show_progress = TRUE) {
     stopifnot(is.data.frame(x),
         is.character(criterion), criterion %in% names(x),
         is.numeric(n), n > 0)
@@ -287,16 +290,11 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
     if (all(x[[criterion]] %in% c(0, 1))) {
         logistic <- TRUE
     }
-    if (logistic) {
-        message("Using logistic regression.")
-    } else {
-        message("Using ordinary regression.")
-    }
 
     k <- numeric(n)
     assoc_train <- numeric(n)
     assoc_valid <- numeric(n)
-    nonpos_vars_excluded <- numeric(n)
+    nonpos_vars_excluded <- numeric(n) ######
     for (i in 1:n) {
         if (show_progress) cat(i, ".", sep = "")
         # Create training and validation data frames
@@ -350,24 +348,46 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
         if (is.null(k[i]) || k[i] == 0) {
             warning("k (number of predictors) is 0 in MC iteration step ", i)
             k[i] <- 0
-            assoc_train[i] <- NA
-            assoc_valid[i] <- NA
+            assoc_train[i] <- NA ######
+            assoc_valid[i] <- NA ######
         }
     }
     if (show_progress) cat("\n")
-    if (plot) {
-        if (logistic) {
-            cnt <- max( hist(assoc_valid, main = "AUC for validation data", xlab = "AUC")$counts )
-            m <- mean(assoc_valid)
-            lines(c(m, m), c(-0.5,cnt), col = "red")
-        } else {
-            cnt <- max( hist(assoc_valid, main = "Correlation for validation data", xlab = "Correlation")$counts )
-            m <- mean(assoc_valid)
-            lines(c(m, m), c(-0.5,cnt), col = "red")
-        }
-    }
-    return(list(method = ifelse(logistic, "logistic regression", "ordinary regression"),
-        assoc_train = assoc_train, assoc_valid = assoc_valid,
-        k = k, nonpos_vars_excluded = nonpos_vars_excluded))
+    output <- list(
+        method = ifelse(logistic, "logistic regression", "ordinary regression"),
+        k = k,
+        assoc_train = assoc_train,
+        assoc_valid = assoc_valid,
+        nonpos_vars_excluded = nonpos_vars_excluded)
+    class(output) <- c("mc_crossvalidation_regression", class(output))
+    return(output)
+}
+
+#' @export
+print.mc_crossvalidation_regression <- function(x, ...) {
+    cat("Method: ", x$method, "\n",
+        "Mean k                = ", round(mean(x$k, na.rm = TRUE), 3), "\n",
+        "SD k                  = ", round(stats::sd(x$k, na.rm = TRUE), 3), "\n",
+        "Mean Assoc/Training   = ", round(mean(x$assoc_train, na.rm = TRUE), 3), "\n",
+        "SD Assoc/Training     = ", round(stats::sd(x$assoc_train, na.rm = TRUE), 3), "\n",
+        "Mean Assoc/Validation = ", round(mean(x$assoc_valid, na.rm = TRUE), 3), "\n",
+        "SD Assoc/Validation   = ", round(stats::sd(x$assoc_valid, na.rm = TRUE), 3), "\n",
+        "Non-positive predictors excluded: ", min(x$nonpos_vars_excluded), " - ",
+        max(x$nonpos_vars_excluded), ", M = ", mean(x$nonpos_vars_excluded), "\n",
+        sep = "")
+}
+
+#' @export
+plot.mc_crossvalidation_regression <- function(x, ...) {
+    ### The next line is the only difference to plot.mc_crossvalidation_sps.
+    xlab <- ifelse(x$method == "logistic regression", "AUC", "Correlation")
+    graphics::barplot(table(x$k), xlab  = "Number of Selected Predictors", ylab = "Frequency")
+    h <- graphics::hist(x$assoc_train, main = "Training", xlab = xlab)
+    m <- mean(x$assoc_train, na.rm = TRUE)
+    lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
+    h <- graphics::hist(x$assoc_valid, main = "Validation", xlab = xlab)
+    m <- mean(x$assoc_valid, na.rm = TRUE)
+    lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
+    message("crossvalidation: added three summary plots (see plot history)")
 }
 

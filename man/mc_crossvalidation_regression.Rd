@@ -9,7 +9,6 @@ mc_crossvalidation_regression(
   criterion,
   n = 100L,
   only_positive = TRUE,
-  plot = TRUE,
   show_progress = TRUE
 )
 }
@@ -22,17 +21,16 @@ mc_crossvalidation_regression(
 
 \item{only_positive}{keep only predictors with positive regression coefficients in the training run in the model?}
 
-\item{plot}{plot a histogram of the distribution of the associations for the validation sample?}
-
 \item{show_progress}{show progress?}
 }
 \value{
 A list containing the components
 \itemize{
+\item \code{k} (number of predictors identified in each run),
+\item \code{method} (logistic or ordinary regression),
 \item \code{assoc_train} (associations in the training set),
-\item \code{assoc_valid} (associations in the validation set), and
-\item \code{k} (number of predictors identified in each run).
-\item \code{nonpos_vars_excluded} (number of variables excluded due to nonpositive regression coefficients)
+\item \code{assoc_valid} (associations in the validation set),
+\item \code{nonpos_vars_excluded} (number of variables excluded due to nonpositive regression coefficients).
 }
 
 The components are vectors with each value representing the result of one Monte Carlo run.

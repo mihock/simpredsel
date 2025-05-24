@@ -35,9 +35,10 @@ mc_crossvalidation_sps(
 \value{
 A list containing the components
 \itemize{
+\item \code{k} (number of predictors identified in each run),
+\item \code{assoc_measure} (type of association measure),
 \item \code{assoc} (associations in the training set),
-\item \code{assoc_valid} (associations in the validation set), and
-\item \code{k} (number of predictors identified in each run).
+\item \code{assoc_valid} (associations in the validation set).
 }
 
 The components are vectors with each value representing the result of one Monte Carlo run.
