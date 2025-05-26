@@ -277,7 +277,7 @@ plot.mc_crossvalidation_sps <- function(x, ...) {
 #' - `assoc_valid` (associations in the validation set),
 #' - `nonpos_vars_excluded` (number of variables excluded due to nonpositive regression coefficients).
 #'
-#' The components are vectors with each value representing the result of one Monte Carlo run.
+#' The components are vectors with each value representing the result of one Monte Carlo run. In the case of logistic regression, associations are measured by the area under the ROC curve (AUC), otherwise associations are measured by the correlation coefficient.
 #'
 #' @references Xu, Q.-S., & Liang, Y.-Z. (2001). Monte Carlo cross validation. *Chemometrics and Intelligent Laboratory Systems*, *56*(1), 1–11. https://doi.org/10.1016/S0169-7439(00)00122-2
 #'

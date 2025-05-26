@@ -33,7 +33,7 @@ A list containing the components
 \item \code{nonpos_vars_excluded} (number of variables excluded due to nonpositive regression coefficients).
 }
 
-The components are vectors with each value representing the result of one Monte Carlo run.
+The components are vectors with each value representing the result of one Monte Carlo run. In the case of logistic regression, associations are measured by the area under the ROC curve (AUC), otherwise associations are measured by the correlation coefficient.
 }
 \description{
 Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with \link[stats:step]{stats::step}. The use of ordinary or logistic regression depends on the criterion values. Logistic regression is used when the criterion values are binary and coded with 0 and 1. Otherwise, ordinary regression is used.
