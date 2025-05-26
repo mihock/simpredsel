@@ -354,7 +354,9 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
     }
     if (show_progress) cat("\n")
     output <- list(
-        method = ifelse(logistic, "logistic regression", "ordinary regression"),
+        method = ifelse(logistic,
+            "logistic regression (association measure: AUC)",
+            "ordinary regression (association measure: correlation)"),
         k = k,
         assoc_train = assoc_train,
         assoc_valid = assoc_valid,
