@@ -382,7 +382,7 @@ print.mc_crossvalidation_regression <- function(x, ...) {
 #' @export
 plot.mc_crossvalidation_regression <- function(x, ...) {
     ### The next line is the only difference to plot.mc_crossvalidation_sps.
-    xlab <- ifelse(x$method == "logistic regression", "AUC", "Correlation")
+    xlab <- ifelse(substr(x$method, 1, 4) == "logi", "AUC", "Correlation")
     graphics::barplot(table(x$k), xlab  = "Number of Selected Predictors", ylab = "Frequency")
     h <- graphics::hist(x$assoc_train, main = "Training", xlab = xlab)
     m <- mean(x$assoc_train, na.rm = TRUE)
