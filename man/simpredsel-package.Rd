@@ -34,14 +34,14 @@ round(cor(dat), 2)
 
 # Analysis ----------------------------------------
 
-# The following would do one run:
-# sim_pred_sel(dat, "crit")
+# One run of simple_pred_sel
+sim_pred_sel(dat, "crit")
 
-# Cross-validation runs multiple (by default 100 ) times and yields
-# summary statistics and plots of the distribution of the interesting
-# statistics.
+# Cross-validation runs simple_pred_sel multiple (by default 100 ) times
+# and yields summary statistics and plots of the distribution of the
+# interesting statistics.
 
-# Simple predictor selection:
+# Selection via simple predictor selection:
 res_mc <- mc_crossvalidation_sps(dat, criterion = "crit")
 res_mc
 plot(res_mc)

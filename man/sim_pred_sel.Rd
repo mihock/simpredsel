@@ -49,4 +49,6 @@ The search for predictors is done by forward selection. The procedure starts wit
 Association may be measured by the area under the ROC curve (AUC) or by the correlation coefficient. All predictors should be coded in the same direction as the criterion, so that the correlations between the predictors and the criterion are positive. When the association is measured by the AUC, the criterion should be binary, with its values coded 0 or 1 (indicator coding).
 
 Predictors with zero variance are removed from the predictor set before testing incremental validity. By default, predictors with nonpositive correlation with the criterion are also removed in advance. The latter may be included, however, this does normally not matter because predictors with negative correlations with the criterion rarely contribute to the validity of a sum score. (This would be a kind of suppressor effect.)
+
+For an example, see \link{simpredsel}.
 }

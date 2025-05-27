@@ -26,6 +26,9 @@ compute_aucs <- function(x) {
 #'
 #' Predictors with zero variance are removed from the predictor set before testing incremental validity. By default, predictors with nonpositive correlation with the criterion are also removed in advance. The latter may be included, however, this does normally not matter because predictors with negative correlations with the criterion rarely contribute to the validity of a sum score. (This would be a kind of suppressor effect.)
 #'
+#' For an example, see [simpredsel].
+#'
+#'
 #' @param x data frame containing predictors and criterion
 #' @param criterion character string specifying the criterion (must be in `x`)
 #' @param assoc_measure type of association measure. May be `auc` (area under the ROC) or `cor` (correlation). For the former, the criterion must be binary (coded 0 for absence, 1 for presence of a feature).
@@ -138,8 +141,9 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
         }
     }
     if (show_progress) {
-        print(knitr::kable(progressDf, digits = 3, row.names = FALSE,
-            col.names = c("i", "Item", "Correlation/Item", "Association/Sum score")))
+        print(knitr::kable(progressDf, format = "simple", digits = 3,
+          row.names = FALSE,
+          col.names = c("i", "Item", "Correlation/Item", "Association/Sum score")))
         cat("\n")
     }
     # Output / all predictors processed
@@ -166,6 +170,8 @@ print.sim_pred_sel <- function(x, ...) {
 #' Monte Carlo Cross-Validation for Simple Predictor Selection
 #'
 #' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [sim_pred_sel].
+#'
+#' For an example, see [simpredsel].
 #'
 #' @param x data frame containing predictors and criterion
 #' @param criterion character string specifying the criterion (must be in `x`)
@@ -262,6 +268,8 @@ plot.mc_crossvalidation_sps <- function(x, ...) {
 #' Monte Carlo Cross-Validation for Predictor Selection with Linear or Logistic Regression
 #'
 #' Stratified Monte Carlo (repeated random sub-sampling) cross-validation for predictor selections with [stats::step]. The use of ordinary or logistic regression depends on the criterion values. Logistic regression is used when the criterion values are binary and coded with 0 and 1. Otherwise, ordinary regression is used.
+#'
+#' For an example, see [simpredsel].
 #'
 #' @param x data frame containing predictors and criterion
 #' @param criterion character string specifying the criterion (must be in `x`)
