@@ -12,7 +12,10 @@ Imports:
     pROC,
     splitTools,
     knitr,
-    MASS
+    MASS,
+    rlang,
+    dplyr,
+    ggplot2
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

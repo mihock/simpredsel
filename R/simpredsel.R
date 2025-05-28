@@ -236,33 +236,8 @@ mc_crossvalidation_sps <- function(x, criterion, n = 100L, assoc_measure = c("au
         assoc_measure = assoc_measure,
         assoc_train = assoc_train,
         assoc_valid = assoc_valid)
-    class(output) <- c("mc_crossvalidation_sps", class(output))
+    class(output) <- c("mc_crossvalidation", class(output))
     return(output)
-}
-
-#' @export
-print.mc_crossvalidation_sps <- function(x, ...) {
-    cat("Measure: ", x$assoc_measure, "\n",
-        "Mean k                = ", round(mean(x$k, na.rm = TRUE), 3), "\n",
-        "SD k                  = ", round(stats::sd(x$k, na.rm = TRUE), 3), "\n",
-        "Mean Assoc/Training   = ", round(mean(x$assoc_train, na.rm = TRUE), 3), "\n",
-        "SD Assoc/Training     = ", round(stats::sd(x$assoc_train, na.rm = TRUE), 3), "\n",
-        "Mean Assoc/Validation = ", round(mean(x$assoc_valid, na.rm = TRUE), 3), "\n",
-        "SD Assoc/Validation   = ", round(stats::sd(x$assoc_valid, na.rm = TRUE), 3), "\n",
-        sep = "")
-}
-
-#' @export
-plot.mc_crossvalidation_sps <- function(x, ...) {
-    xlab <- ifelse(x$assoc_measure == "auc", "AUC", "Correlation")
-    graphics::barplot(table(x$k), xlab  = "Number of Selected Predictors", ylab = "Frequency")
-    h <- graphics::hist(x$assoc_train, main = "Training", xlab = xlab)
-    m <- mean(x$assoc_train, na.rm = TRUE)
-    lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
-    h <- graphics::hist(x$assoc_valid, main = "Validation", xlab = xlab)
-    m <- mean(x$assoc_valid, na.rm = TRUE)
-    lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
-    message("crossvalidation: added three summary plots (see plot history)")
 }
 
 #' Monte Carlo Cross-Validation for Predictor Selection with Linear or Logistic Regression
@@ -369,35 +344,90 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
         assoc_train = assoc_train,
         assoc_valid = assoc_valid,
         nonpos_vars_excluded = nonpos_vars_excluded)
-    class(output) <- c("mc_crossvalidation_regression", class(output))
+    class(output) <- c("mc_crossvalidation", class(output))
     return(output)
 }
 
 #' @export
-print.mc_crossvalidation_regression <- function(x, ...) {
-    cat("Method: ", x$method, "\n",
-        "Mean k                = ", round(mean(x$k, na.rm = TRUE), 3), "\n",
-        "SD k                  = ", round(stats::sd(x$k, na.rm = TRUE), 3), "\n",
-        "Mean Assoc/Training   = ", round(mean(x$assoc_train, na.rm = TRUE), 3), "\n",
-        "SD Assoc/Training     = ", round(stats::sd(x$assoc_train, na.rm = TRUE), 3), "\n",
-        "Mean Assoc/Validation = ", round(mean(x$assoc_valid, na.rm = TRUE), 3), "\n",
-        "SD Assoc/Validation   = ", round(stats::sd(x$assoc_valid, na.rm = TRUE), 3), "\n",
-        "Non-positive predictors excluded: ", min(x$nonpos_vars_excluded), " - ",
-        max(x$nonpos_vars_excluded), ", M = ", mean(x$nonpos_vars_excluded), "\n",
-        sep = "")
+print.mc_crossvalidation <- function(x, ...) {
+  if ("assoc_measure" %in% names(x)) {
+    # x stems from mc_crossvalidation_sps
+    cat("Measure: ", x$assoc_measure, "\n")
+  } else {
+    # x stems from mc_crossvalidation_regression
+    cat("Method: ", x$method, "\n")
+  }
+  cat(
+    "Mean k                = ", round(mean(x$k, na.rm = TRUE), 3), "\n",
+    "SD k                  = ", round(stats::sd(x$k, na.rm = TRUE), 3), "\n",
+    "Mean Assoc/Training   = ", round(mean(x$assoc_train, na.rm = TRUE), 3), "\n",
+    "SD Assoc/Training     = ", round(stats::sd(x$assoc_train, na.rm = TRUE), 3), "\n",
+    "Mean Assoc/Validation = ", round(mean(x$assoc_valid, na.rm = TRUE), 3), "\n",
+    "SD Assoc/Validation   = ", round(stats::sd(x$assoc_valid, na.rm = TRUE), 3), "\n",
+    sep = "")
+  if ("method" %in% names(x)) {
+    cat("Non-positive predictors excluded: ", min(x$nonpos_vars_excluded), " - ",
+      max(x$nonpos_vars_excluded), ", M = ", mean(x$nonpos_vars_excluded), "\n",
+      sep = "")
+  }
 }
 
+#' Plot Results From a Cross-Validation
+#'
+#' Plot results from a cross-validation with [mc_crossvalidation_sps] or [mc_crossvalidation_regression]: a barplot for the distribution of the number of items in the training sets and two histograms for the distributions of the association measures in the training and the validation set.
+#'
+#' @param x results from one of the cross-validation functions
+#' @param ... may include `binwidth` (binwidth for plot of histograms of the associations, default: 0.01), `fill` (fill color for bars, default: "steelblue"), `col_mean` (color of lines indicating means, default: "black")
+#'
 #' @export
-plot.mc_crossvalidation_regression <- function(x, ...) {
-    ### The next line is the only difference to plot.mc_crossvalidation_sps.
+#' @importFrom rlang .data
+#' @importFrom ggplot2 aes facet_wrap geom_histogram geom_vline ggplot labs
+#' @importFrom dplyr summarise group_by
+#'
+plot.mc_crossvalidation <- function(x, ...) {
+  arglist <- list(...)
+  if (is.null(arglist$binwidth)) arglist$binwidth <- 0.01
+  if (is.null(arglist$fill)) arglist$fill <- "steelblue"
+  if (is.null(arglist$col_mean)) arglist$col_mean <- "black"
+
+  if ("assoc_measure" %in% names(x)) {
+    # x stems from mc_crossvalidation_sps
+    xlab <- ifelse(x$assoc_measure == "auc", "AUC", "Correlation")
+  } else {
+    # x stems from mc_crossvalidation_regression
     xlab <- ifelse(substr(x$method, 1, 4) == "logi", "AUC", "Correlation")
-    graphics::barplot(table(x$k), xlab  = "Number of Selected Predictors", ylab = "Frequency")
-    h <- graphics::hist(x$assoc_train, main = "Training", xlab = xlab)
-    m <- mean(x$assoc_train, na.rm = TRUE)
-    lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
-    h <- graphics::hist(x$assoc_valid, main = "Validation", xlab = xlab)
-    m <- mean(x$assoc_valid, na.rm = TRUE)
-    lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
-    message("crossvalidation: added three summary plots (see plot history)")
+  }
+
+  # Barplot for k
+  graphics::barplot(table(x$k), xlab  = "Number of Selected Predictors",
+    ylab = "Frequency")
+
+  # Histograms using ggplot2
+  n <- length(x$assoc_train)
+  mydat <- data.frame(source = c(rep("Training", n), rep("Validation", n)),
+    assoc = c(x$assoc_train, x$assoc_valid))
+  p <- ggplot(mydat, aes(x = .data$assoc )) +
+    geom_histogram(binwidth = arglist$binwidth, col = "black", fill = arglist$fill) +
+    labs(x = xlab, y = "Frequency") +
+    facet_wrap(~ source, nrow = 1) ###### 'source' okay?
+  means <- dplyr::group_by(mydat, source) |> dplyr::summarise(m = mean(.data$assoc)) ###### 'source' okay?
+  p <- p + geom_vline(aes(xintercept = .data$m), means, col = arglist$col_mean, linetype = "dotted")
+  print(p)
+
+  message("crossvalidation: added two summary plots (see plot history)")
 }
+
+# #' @export
+# plot.mc_crossvalidation_regression <- function(x, ...) {
+#     ### The next line is the only difference to plot.mc_crossvalidation_sps.
+#     xlab <- ifelse(substr(x$method, 1, 4) == "logi", "AUC", "Correlation")
+#     graphics::barplot(table(x$k), xlab  = "Number of Selected Predictors", ylab = "requency")
+#     h <- graphics::hist(x$assoc_train, main = "Training", xlab = xlab)
+#     m <- mean(x$assoc_train, na.rm = TRUE)
+#     lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
+#     h <- graphics::hist(x$assoc_valid, main = "Validation", xlab = xlab)
+#     m <- mean(x$assoc_valid, na.rm = TRUE)
+#     lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
+#     message("crossvalidation: added three summary plots (see plot history)")
+# }
 

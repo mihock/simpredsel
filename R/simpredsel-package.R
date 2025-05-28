@@ -16,7 +16,7 @@
 #' S
 #'
 #' # Generate data ----------------------------------------
-#' set.seed(123)
+#' set.seed(16054)
 #' dat <- as.data.frame(MASS::mvrnorm(n = n, mu = rep(0, k), Sigma = S))
 #' # Binary criterion
 #' dat$crit <- ifelse(rowMeans(dat[, 1:3],) + rnorm(n, 0, 1) > 0, 1, 0)
