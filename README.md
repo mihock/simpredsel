@@ -16,6 +16,8 @@ For purposes of comparison, there is also a cross-validation function that uses 
 You can install `simpredsel` from [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("pak")
-pak::pak("mihock/simpredsel")
+# install.packages("remotes")
+remotes::install_github("mihock/simpredsel")
 ```
+
+Under Windows may need [Rtools](https://cran.r-project.org/bin/windows/Rtools/) for this.
