@@ -159,9 +159,6 @@ sim_pred_sel <- function(x, criterion, assoc_measure = c("auc", "cor"), only_pos
     # invisible(output)
 }
 
-### Not working anymore?
-### @method print sim_pred_sel
-### @noRd
 #' @export
 print.sim_pred_sel <- function(x, ...) {
     cat("k = ", x$k, ", association = ", round(x$assoc, 3), "\n", sep = "")
@@ -277,7 +274,7 @@ mc_crossvalidation_regression <- function(x, criterion, n = 100L, only_positive 
     k <- numeric(n)
     assoc_train <- numeric(n)
     assoc_valid <- numeric(n)
-    nonpos_vars_excluded <- numeric(n) ######
+    nonpos_vars_excluded <- numeric(n)
     for (i in 1:n) {
         if (show_progress) cat(i, ".", sep = "")
         # Create training and validation data frames
@@ -416,18 +413,4 @@ plot.mc_crossvalidation <- function(x, ...) {
 
   message("crossvalidation: added two summary plots (see plot history)")
 }
-
-# #' @export
-# plot.mc_crossvalidation_regression <- function(x, ...) {
-#     ### The next line is the only difference to plot.mc_crossvalidation_sps.
-#     xlab <- ifelse(substr(x$method, 1, 4) == "logi", "AUC", "Correlation")
-#     graphics::barplot(table(x$k), xlab  = "Number of Selected Predictors", ylab = "requency")
-#     h <- graphics::hist(x$assoc_train, main = "Training", xlab = xlab)
-#     m <- mean(x$assoc_train, na.rm = TRUE)
-#     lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
-#     h <- graphics::hist(x$assoc_valid, main = "Validation", xlab = xlab)
-#     m <- mean(x$assoc_valid, na.rm = TRUE)
-#     lines(x = c(m, m), y = c(0, max(h$counts)), col = "red")
-#     message("crossvalidation: added three summary plots (see plot history)")
-# }
 
